@@ -1,6 +1,0 @@
-fastapi
-uvicorn
-groq
-requests
-pydantic
-python-multipart
