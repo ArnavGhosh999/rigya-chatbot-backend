@@ -29,7 +29,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Configuration
-GROQ_API_KEY = "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"
+GROQ_API_KEY = "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"
 GROQ_MODEL = "llama3-70b-8192"  # Fast Llama 3 70B model
 # No additional API keys needed - using free APIs (DuckDuckGo, Wikipedia)
 
