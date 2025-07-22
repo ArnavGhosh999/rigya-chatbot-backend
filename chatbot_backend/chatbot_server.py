@@ -4,11 +4,13 @@ import json
 import logging
 import time
 import requests
+import os
 from datetime import datetime
 from typing import List, Dict, Optional, Any
 import uuid
 import re
 from urllib.parse import quote_plus
+from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -28,8 +30,65 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Configuration
-GROQ_API_KEY = "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"
+# Load environment variables from .env file
+def load_env_file():
+    """Load environment variables from .env file"""
+    # Look for .env in parent directory (where your .env file actually is)
+    env_file = Path(__file__).parent.parent / '.env'
+    
+    print(f"🔍 Looking for .env file at: {env_file}")
+    
+    if env_file.exists():
+        print(f"✅ Found .env file at: {env_file}")
+        with open(env_file, 'r', encoding='utf-8') as f:
+            for line_num, line in enumerate(f, 1):
+                line = line.strip()
+                if line and not line.startswith('#') and '=' in line:
+                    try:
+                        key, value = line.split('=', 1)
+                        os.environ[key.strip()] = value.strip()
+                        print(f"✅ Loaded: {key.strip()}")
+                    except Exception as e:
+                        print(f"⚠️ Error parsing line {line_num}: {line} - {e}")
+        print("✅ Environment variables loaded successfully!")
+        return True
+    else:
+        print(f"❌ No .env file found at: {env_file}")
+        print("💡 Make sure .env file exists in the root directory")
+        
+        # Also check current directory
+        current_env = Path('.env')
+        if current_env.exists():
+            print(f"✅ Found .env in current directory: {current_env}")
+            with open(current_env, 'r', encoding='utf-8') as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith('#') and '=' in line:
+                        key, value = line.split('=', 1)
+                        os.environ[key.strip()] = value.strip()
+            return True
+        return False
+
+# Load environment variables BEFORE trying to use them
+print("🚀 Loading environment variables...")
+env_loaded = load_env_file()
+
+if not env_loaded:
+    print("❌ Could not load .env file!")
+    print("💡 Make sure you have a .env file in the root directory with:")
+    print("   GROQ_API_KEY=your_actual_api_key")
+
+# Now get the API key (this should work after loading .env)
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
+
+if not GROQ_API_KEY:
+    print("❌ GROQ_API_KEY environment variable is not set!")
+    print("💡 Make sure your .env file contains: GROQ_API_KEY=your_api_key_here")
+    print("💡 Current environment variables:", [k for k in os.environ.keys() if 'GROQ' in k])
+    raise ValueError("GROQ_API_KEY environment variable is required")
+
+print(f"✅ GROQ_API_KEY loaded successfully: {GROQ_API_KEY[:10]}...****")
+
 GROQ_MODEL = "llama3-70b-8192"  # Fast Llama 3 70B model
 # No additional API keys needed - using free APIs (DuckDuckGo, Wikipedia)
 
